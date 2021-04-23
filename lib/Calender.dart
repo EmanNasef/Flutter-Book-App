@@ -1,5 +1,7 @@
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:task/Models/CalenderModel.dart';
+import 'package:task/APIs/CalenderAPI.dart';
 
 class Calender extends StatefulWidget {
   @override
@@ -7,6 +9,7 @@ class Calender extends StatefulWidget {
 }
 
 class _CalenderState extends State<Calender> {
+  FetchAPI fetchAPI = FetchAPI();
   CalendarController _calendarController;
   @override
   void initState() {
@@ -41,30 +44,44 @@ class _CalenderState extends State<Calender> {
             ),
             onDaySelected: (date, events, e) {
               showBottomSheet(
-                  context: context,
-                  builder: (context) => Container(
-                        height: height / (2.5),
-                        width: width,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                context: context,
+                builder: (context) => Container(
+                  height: height / (2),
+                  width: width,
+                  child: FutureBuilder(
+                      future: fetchAPI.fetchCalender(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState != ConnectionState.done)
+                          return Center(child: CircularProgressIndicator());
+
+                        List<CalenderModel> calenderData = snapshot.data;
+
+                        return Column(
                           children: [
                             Center(
                               child: Text(
                                 date.toUtc().toString(),
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
                               ),
                             ),
-                            MyCard(
-                              title: 'Hair Cut (3:26pm)',
-                              details: 'cutting hair today',
+                            Expanded(
+                              child: ListView.builder(
+                                  itemCount: calenderData.length,
+                                  itemBuilder: (context, int index) {
+                                    return MyCard(
+                                      title: calenderData[index].title,
+                                      details: calenderData[index].note,
+                                    );
+                                  }),
                             ),
-                            MyCard(
-                              title: 'Study (5:45 pm)',
-                              details: 'study dart then flutter',
-                            )
                           ],
-                        ),
-                      ));
+                        );
+                      }),
+                ),
+              );
             },
           ),
         ],
@@ -82,7 +99,7 @@ class MyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.grey[350],
+      color: Colors.grey[300],
       margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
       child: Padding(
         padding: const EdgeInsets.all(20.0),

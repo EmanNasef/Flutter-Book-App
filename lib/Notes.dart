@@ -1,45 +1,57 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:task/APIs/NotesAPI.dart';
+import 'package:task/Models/NotesModel.dart';
 
-class Notes extends StatelessWidget {
+class Notes extends StatefulWidget {
+  @override
+  _NotesState createState() => _NotesState();
+}
+
+class _NotesState extends State<Notes> {
+  FetchAPI fetchAPI = FetchAPI();
+
+  Color _getColorById(int id) {
+    if (id == 1) return Colors.amberAccent;
+    if (id == 2) return Colors.white;
+    return Colors.red;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        MyContainer(
-          color: Colors.amberAccent,
-          title: 'My first Note',
-          note: 'it seems to be good , lol I don\'t found words to write :D ',
-        ),
-        MyContainer(
-          color: Colors.white,
-          title: 'Find the difference word ',
-          note:
-              'Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Bla Blu Bla Bla Bla Bla Bla Bla Bla Bla BlaBla Bla Bla Bla Bla Bla Bla Bla',
-        ),
-        MyContainer(
-          color: Colors.red,
-          title: 'Be Careful',
-          note: 'you should study well ',
-        )
-      ],
-    );
+    return FutureBuilder(
+        future: fetchAPI.fetchNotes(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done)
+            return Center(child: CircularProgressIndicator());
+
+          List<NotesModel> myNotes = snapshot.data;
+          return ListView.builder(
+            itemCount: myNotes.length,
+            itemBuilder: (context, int index) {
+              return MyContainer(
+                color: _getColorById(myNotes[index].id),
+                title: myNotes[index].title,
+                note: myNotes[index].description,
+              );
+            },
+          );
+        });
   }
 }
 
-// ignore: must_be_immutable
 class MyContainer extends StatelessWidget {
-  Color color;
+  var color;
   String title;
   String note;
-  MyContainer({this.color, this.title, this.note});
+
+  MyContainer({this.title, this.note, this.color});
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(10),
       margin: EdgeInsets.all(18),
       decoration: BoxDecoration(
+        color: color,
         borderRadius: BorderRadius.circular(4),
         boxShadow: [
           BoxShadow(
@@ -49,7 +61,6 @@ class MyContainer extends StatelessWidget {
             offset: Offset(0, 3), // changes position of shadow
           ),
         ],
-        color: color,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,6 +68,9 @@ class MyContainer extends StatelessWidget {
           Text(
             title,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          SizedBox(
+            height: 5,
           ),
           Text(note),
         ],

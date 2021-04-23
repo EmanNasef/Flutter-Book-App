@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'Tasks.dart';
+import 'Calender.dart';
 import 'Contacts.dart';
 import 'Notes.dart';
-import 'Calender.dart';
+import 'Tasks.dart';
 
 void main() => runApp(MyApp());
 
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
           ),
           body: TabBarView(children: [
             Calender(),
-            Conacts(),
+            Contacts(),
             Notes(),
             Tasks(),
           ]),
